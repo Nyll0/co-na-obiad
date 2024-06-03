@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's for Lunch?</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>What's for Lunch?</h1>
+        </header>
+        <main>
+            <div class="input-section">
+                <label for="diet">Dietary Preference:</label>
+                <select id="diet">
+                    <option value="none">Any</option>
+                    <option value="vegetarian">Vegetarian</option>
+                    <option value="non-vegetarian">Non-Vegetarian</option>
+                    <option value="pescatarian">Pescatarian</option>
+                </select>
+
+                <label for="cuisine">Preferred Cuisine:</label>
+                <select id="cuisine">
+                    <option value="none">Any</option>
+                    <option value="american">American</option>
+                    <option value="mediterranean">Mediterranean</option>
+                    <option value="japanese">Japanese</option>
+                </select>
+
+                <label for="budget">Budget:</label>
+                <select id="budget">
+                    <option value="none">Any</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+
+                <button id="findLunch">Find Lunch</button>
+            </div>
+            <div class="result" id="result" style="display: none;">
+                <h2 id="lunchName">Lunch Name</h2>
+                <img id="lunchImage" src="" alt="Lunch Image">
+                <p id="lunchDetails">Diet: Vegetarian | Cuisine: Japanese | Budget: Medium</p>
+                <a id="recipeLink" href="#" target="_blank">View Recipe</a>
+                <button id="newSuggestion">New Suggestion</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('findLunch').addEventListener('click', function() {
+            const diet = document.getElementById('diet').value;
+            const cuisine = document.getElementById('cuisine').value;
+            const budget = document.getElementById('budget').value;
+
+            console.log('Sending request with:', { diet, cuisine, budget });
+
+            fetch('http://127.0.0.1:5000/get_lunch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ diet, cuisine, budget }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('lunchName').textContent = data.name;
+                    document.getElementById('lunchImage').src = data.image_url;
+                    document.getElementById('lunchDetails').textContent = `Diet: ${data.diet} | Cuisine: ${data.cuisine} | Budget: ${data.budget}`;
+                    document.getElementById('recipeLink').href = data.recipe_url;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('newSuggestion').addEventListener('click', function() {
+            document.getElementById('result').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
